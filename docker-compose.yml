@@ -50,7 +50,8 @@ services:
     hostname: pihole
     dns:
       - 127.0.0.1
-      - ${PIHOLE_DNS}
+      - ${PIHOLE_DNS_1}
+      - ${PIHOLE_DNS_2}
     volumes:
       - './etc-pihole:/etc/pihole'
       - './etc-dnsmasq.d:/etc/dnsmasq.d'
