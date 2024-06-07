@@ -1,4 +1,3 @@
-version: "3"
 networks:
   private_network:
     ipam:
@@ -6,25 +5,14 @@ networks:
       config:
         - subnet: 10.2.0.0/24
 services:
-  unbound:
-    image: mvance/unbound:latest
-    container_name: unbound
-    restart: unless-stopped
-    hostname: unbound
-    volumes:
-      - ./unbound:/opt/unbound/etc/unbound/
-    networks:
-      private_network:
-        ipv4_address: 10.2.0.200
-    cap_add:
-      - NET_ADMIN
-    env_file: .env
   wireguard:
     depends_on:
-      - unbound
       - pihole
     image: linuxserver/wireguard
     container_name: wireguard
+    networks:
+      private_network:
+        ipv4_address: 10.2.0.200
     ports:
       - 5000:5000
       - 51820:51820/udp
@@ -56,8 +44,6 @@ services:
     env_file: .env
 
   pihole:
-    depends_on:
-      - unbound
     container_name: pihole
     image: pihole/pihole:latest
     restart: unless-stopped
@@ -66,11 +52,16 @@ services:
       - 127.0.0.1
       - ${PIHOLE_DNS}
     volumes:
-      - ./etc-pihole/:/etc/pihole/
-      - ./etc-dnsmasq.d/:/etc/dnsmasq.d/
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
     cap_add:
       - NET_ADMIN
     networks:
       private_network:
         ipv4_address: 10.2.0.100
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "80:80/tcp"
     env_file: ./.env
+
